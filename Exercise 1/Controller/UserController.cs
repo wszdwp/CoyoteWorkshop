@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +8,6 @@ namespace TinyService
 {
     using Document = Dictionary<string, string>;
 
-    // TODO: Implement the methods of the User Controller
     public class UserController
     {
         public async Task<ActionResult<User>> CreateUser(
@@ -22,11 +21,28 @@ namespace TinyService
 
             logger.Write($"Creating user {userName}, {email}, {phoneNumber}, {mailingAddress}, {billingAddress}");
 
-            var db = new DatabaseProvider("CreateUser", logger);
+            var db = new DatabaseProvider("CreateUser");
 
-            // TODO: Implement the logic
+            var doc = new Document();
+            doc[Constants.EmailAddress] = email;
+            doc[Constants.PhoneNumber] = phoneNumber;
+            doc[Constants.MailingAddress] = mailingAddress;
+            doc[Constants.BillingAddress] = billingAddress;
 
-            return null;
+            bool success = await db.AddDocumentIfNotExists(Constants.UserCollection, userName, doc);
+
+            if (!success)
+            {
+                return new ActionResult<User>() { Success = false, Response = null };
+            } 
+            else
+            {
+                return new ActionResult<User>()
+                {
+                    Success = true,
+                    Response = new User(userName, doc)
+                };
+            }
         }
 
         public async Task<ActionResult<User>> GetUser(string userName)
@@ -35,37 +51,63 @@ namespace TinyService
 
             logger.Write("Get user " + userName);
 
-            var db = new DatabaseProvider("GetUser", logger);
+            var db = new DatabaseProvider("GetUser");
+            var doc = await db.GetDocumentIfExists(Constants.UserCollection, userName);
+            if (doc == null)
+            {
+                return new ActionResult<User>() { Success = false, Response = null };
+            }
 
-            // TODO: Implement the logic
-
-            return null;
+            return new ActionResult<User>() 
+            { 
+                Success = true, 
+                Response = new User(userName, doc) 
+            };
         }
 
         public async Task<ActionResult<Address>> UpdateUserAddress(string userName, string mailingAddress, string billingAddress)
         {
             var logger = new Logger(nameof(UserController));
-
             logger.Write($"Updating user address {userName} {mailingAddress} {billingAddress}");
 
-            var db = new DatabaseProvider("UpdateUserAddress", logger);
+            var db = new DatabaseProvider("UpdateUserAddress");
 
-            // TODO: Implement the logic
-
-            return null;
+            var document = await db.GetDocumentIfExists(Constants.UserCollection, userName);
+            if (document == null)
+            {
+                return new ActionResult<Address>() { Success = false, Response = null };
+            }
+            
+            document[Constants.BillingAddress] = billingAddress;
+            document[Constants.MailingAddress] = mailingAddress;
+            //await db.UpdateDocument(Constants.UserCollection, userName, document);
+            bool success = await db.UpdateDocumentIfExists(Constants.UserCollection, userName, document);
+            
+            return new ActionResult<Address>() 
+            {
+                Success = success, 
+                Response = (success ? new Address(mailingAddress, billingAddress) : null)
+            };
         }
 
         public async Task<ActionResult<User>> DeleteUser(string userName)
         {
             var logger = new Logger(nameof(UserController));
-
             logger.Write("Deleting user " + userName);
 
-            var db = new DatabaseProvider("DeleteUser", logger);
-
-            // TODO: Implement the logic
-
-            return null;
+            var db = new DatabaseProvider("DeleteUser");
+            var document = await db.GetDocumentIfExists(Constants.UserCollection, userName);
+            //await db.DeleteDocument(Constants.UserCollection, userName);
+            if (document == null)
+            {
+                return new ActionResult<User>() { Success = false, Response = null };
+            }
+            bool success = await db.DeleteDocumentIfExists(Constants.UserCollection, userName);
+            return new ActionResult<User>()
+            {
+                Success = success, 
+                Response = (success ? new User(userName, document) : null)
+            };
         }
     }
 
