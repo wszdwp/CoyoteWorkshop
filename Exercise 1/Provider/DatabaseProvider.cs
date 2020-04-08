@@ -160,7 +160,8 @@ namespace TinyService
                 return table.ContainsKey(rowKey);
             });
         }
-               // My implementations 
+        
+        // My implementations 
         // Impl 1 - passed tests
         public async Task<bool> AddDocumentIfNotExists(string collectionName, string rowKey, Document doc)
         {
