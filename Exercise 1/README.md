@@ -12,12 +12,18 @@ You're provided with an implementation of a `DatabaseProvider` class which is a 
 ## Running Coyote Tests
 
 You can run Coyote tests as follows, from the bin/Debug/netcoreapp2.2 folder:
-
+```cmd
   dotnet coyote.dll test TinyService.dll --method UserControllerConcurrencyFuzzing -i 10 --max-steps 100 --verbose
+  
+  dotnet coyote.dll test TinyService.dll --method ConcurrentUserCreates -i 10 --max-steps 100 --verbose
+```
 
 The above command runs the UserControllerConcurrencyFuzzing test for 10 iterations, prints out log lines on the console and bounds the execution of each iteration to 100 steps. You can run the test for a higher number of iterations, though you might want to turn off verbosity in that mode.
-
+```cmd
   dotnet coyote.dll test TinyService.dll --method UserControllerConcurrencyFuzzing -i 1000 --max-steps 100
+  
+  dotnet coyote.dll test TinyService.dll --method ConcurrentUserCreates -i 1000 --max-steps 100
+```
 
 ## Replaying Tests
 
