@@ -163,6 +163,7 @@ namespace TinyService
         
         // My implementations 
         // Impl 1 - passed tests
+        /**
         public async Task<bool> AddDocumentIfNotExists(string collectionName, string rowKey, Document doc)
         {
             logger.Write($"AddDocumentIfExists {rowKey}, {DocToStr(doc)} in collection {collectionName}");
@@ -222,8 +223,9 @@ namespace TinyService
                 return false;
             }
         }
+        */
 
-        // Impl 2 - failed tests
+        // Impl 2 - passed tests
         public async Task<bool> AddDocumentIfNotExists(string collectionName, string rowKey, Document doc)
         {
             logger.Write($"AddDocumentIfExists {rowKey}, {DocToStr(doc)} in collection {collectionName}");
