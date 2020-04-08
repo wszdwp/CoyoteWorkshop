@@ -160,6 +160,147 @@ namespace TinyService
                 return table.ContainsKey(rowKey);
             });
         }
+               // My implementations 
+        // Impl 1 - passed tests
+        public async Task<bool> AddDocumentIfNotExists(string collectionName, string rowKey, Document doc)
+        {
+            logger.Write($"AddDocumentIfExists {rowKey}, {DocToStr(doc)} in collection {collectionName}");
+            try {
+                await AddDocument(collectionName, rowKey, doc);
+                return true;
+            } catch (DatabaseException e) {
+                Console.WriteLine(e.StackTrace);
+                return false;
+            }
+
+        }
+    
+        public async Task<bool> UpdateDocumentIfExists(string collectionName, string rowKey, Document doc)
+        {
+            logger.Write($"UpdateDocumentIfExists {rowKey}, {DocToStr(doc)} in collection {collectionName}");
+            try {
+                await UpdateDocument(collectionName, rowKey, doc);
+                return true;
+            } catch (DatabaseException e) {
+                Console.WriteLine(e.StackTrace);
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateKeyInDocumentIfExists(string collectionName, string rowKey, string docKey, string docValue)
+        {
+            logger.Write($"UpdateKeyInDocumentIfExists for row {rowKey}, {docKey}: {docValue} in collection {collectionName}");
+            try {
+                await UpdateKeyInDocument(collectionName, rowKey, docKey, docValue);
+                return true;
+            } catch (DatabaseException e) {
+                Console.WriteLine(e.StackTrace);
+                return false;
+            }
+        }
+
+        public async Task<Document> GetDocumentIfExists(string collectionName, string rowKey) 
+        {
+            try {      
+                var doc = await GetDocument(collectionName, rowKey);
+                return doc;
+            } catch (DatabaseException e) {
+                Console.WriteLine(e.StackTrace);
+                return null;
+            }
+        }
+
+        public async Task<bool> DeleteDocumentIfExists(string collectionName, string rowKey)
+        {
+            logger.Write($"DeleteDocumentIfExists {rowKey} in collection {collectionName}");
+            try {
+                await DeleteDocument(collectionName, rowKey);
+                return true;
+            } catch (DatabaseException e) {
+                Console.WriteLine(e.StackTrace);
+                return false;
+            }
+        }
+
+        // Impl 2 - failed tests
+        public async Task<bool> AddDocumentIfNotExists(string collectionName, string rowKey, Document doc)
+        {
+            logger.Write($"AddDocumentIfExists {rowKey}, {DocToStr(doc)} in collection {collectionName}");
+            return await Task.Run(() =>
+            {
+                // Collection is not existed or document is already added
+                if (!collections.ContainsKey(collectionName) || IsDocumentExist(collectionName, rowKey)) return false;
+                    
+                var collection = collections[collectionName];
+                collection[rowKey] = doc;
+                return true;
+            });
+        }
+    
+        public async Task<bool> UpdateDocumentIfExists(string collectionName, string rowKey, Document doc)
+        {
+            return await Task.Run(() =>
+            {
+                logger.Write($"UpdateDocumentIfExists {rowKey}, {DocToStr(doc)} in collection {collectionName}");
+                if (!IsDocumentExist(collectionName, rowKey)) return false;
+
+                var collection = collections[collectionName];
+                collection[rowKey] = doc;
+                return true;
+            });
+        }
+
+        public async Task<bool> UpdateKeyInDocumentIfExists(string collectionName, string rowKey, string docKey, string docValue)
+        {
+            return await Task.Run(() =>
+            {
+                logger.Write($"UpdateKeyInDocumentIfExists for row {rowKey}, {docKey}: {docValue} in collection {collectionName}");
+                if (!IsDocumentExist(collectionName, rowKey)) return false;
+
+                var collection = collections[collectionName];
+                var doc = collection[rowKey];
+                if (!doc.ContainsKey(docKey)) return false;
+                
+                doc[docKey] = docValue;
+                return true;
+            });
+        }
+
+        public async Task<Document> GetDocumentIfExists(string collectionName, string rowKey) 
+        {
+            return await Task.Run(() =>
+            {
+                logger.Write($"GetDocumentIfExists {rowKey} in collection {collectionName}");
+                if (!IsDocumentExist(collectionName, rowKey)) return null;
+
+                var collection = collections[collectionName];
+                return collection[rowKey];
+            });
+        }
+
+        public async Task<bool> DeleteDocumentIfExists(string collectionName, string rowKey)
+        {
+            return await Task.Run(() =>
+            {
+                logger.Write($"DeleteDocumentIfExists {rowKey} in collection {collectionName}");
+                if (!IsDocumentExist(collectionName, rowKey)) return false;
+
+                var collection = collections[collectionName];
+                collection.Remove(rowKey);
+                return true;
+            });
+        }
+
+        private bool IsDocumentExist(string collectionName, string rowKey)
+        {
+            logger.Write($"IsDocumentExist {rowKey} in collection {collectionName}");
+            if (!collections.ContainsKey(collectionName)) return false;
+
+            var table = collections[collectionName];
+            return table.ContainsKey(rowKey);
+        }
+        // My implementations end
+        
         public static void Cleanup()
         {
             collections[Constants.UserCollection].Clear();
