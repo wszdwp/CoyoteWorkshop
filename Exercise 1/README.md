@@ -1,9 +1,15 @@
 ﻿
 # Coyote Workshop - Exercise 1
 
+## Prerequisites
+[Task asynchronous programming model (TAP)](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/)
+[Coyote](https://microsoft.github.io/coyote/learn/overview/what-is-coyote)  
+[Coyote install guide](https://microsoft.github.io/coyote/learn/get-started/install)  
+
+## Description  
 This project contains a simple User controller which supports method to create new users, get user information, delete users and update a given user's mailing and billing address. You can find the skeleton of the controller in `Controllers\UserController.cs`. Your job is to implement the methods of the controller, with two constraints:
 
-* You cannot catch any exceptions in the User controller methods; your code should not include try/catch blocks
+* You cannot catch any exceptions in the User controller methods; your code should not include try/catch blocks, try/catch blocks are only used in DatabaseProvider.
 
 * Your code should pass all the Coyote tests
 
